@@ -10,7 +10,7 @@ export class UserController {
 
   @UsePipes(new ValidationPipe())
   @HttpCode(200)
-  @Put()
+  @Put('update')
   @Auth()
   async updateUser(
     @CurrentUser('id') id: string,
