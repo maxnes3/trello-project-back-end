@@ -5,7 +5,7 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { InsertBoardDto, UpdateBoardDto } from './dto/board.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Boards')
+@ApiTags('Board')
 @Controller('board')
 export class BoardController {
   constructor(

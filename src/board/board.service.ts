@@ -1,124 +1,115 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { InsertBoardDto, UpdateBoardDto } from './dto/board.dto';
 import { UserService } from '../user/user.service';
 
 @Injectable()
 export class BoardService {
-  constructor (
-      private prismaService: PrismaService,
-      private userService: UserService,
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly userService: UserService,
   ) {}
 
-  findCreatorBoardRelation(userId: string, boardId: string) {
-    return this.prismaService.usersWithBoards.findFirst({
+  private async findCreatorBoardRelation(userId: string, boardId: string) {
+    const relation = await this.prismaService.usersWithBoards.findFirst({
       where: {
-        boardId: boardId,
-        userId: userId,
+        boardId,
+        userId,
         isCreator: true,
       },
     });
+
+    if (!relation) {
+      throw new ForbiddenException('User does not have permission to manage this board');
+    }
+
+    return relation;
   }
 
   async findBoardsByUser(userId: string) {
     const userBoards = await this.prismaService.usersWithBoards.findMany({
-      where: {
-        userId: userId,
-      },
-      include: {
-        board: true,
-      },
+      where: { userId },
+      include: { board: true },
     });
-  
-    const boards = userBoards.map(userBoard => userBoard.board);
-  
-    return boards;
+
+    return userBoards.map(userBoard => userBoard.board);
   }
 
-  insert(userId: string, dto: InsertBoardDto) {
-    const board = this.prismaService.board.create({
+  async insert(userId: string, dto: InsertBoardDto) {
+    const board = await this.prismaService.board.create({
       data: {
         name: dto.name,
         usersWithBoards: {
           create: {
-            userId: userId,
+            userId,
             isCreator: true,
           },
         },
       },
-      include: {
-        usersWithBoards: true,
-      },
+      include: { usersWithBoards: true },
     });
-  
+
     return board;
   }
 
-  update(creatorId: string, dto: UpdateBoardDto) {
-    const boardWithCreator = this.findCreatorBoardRelation(creatorId, dto.id);
-
-    if (!boardWithCreator) {
-      throw new ForbiddenException('User dont have permission to update this board');
-    }
+  async update(creatorId: string, dto: UpdateBoardDto) {
+    await this.findCreatorBoardRelation(creatorId, dto.id);
 
     return this.prismaService.board.update({
       where: { id: dto.id },
-      data: {
-        name: dto.name,
-      },
+      data: { name: dto.name },
     });
   }
 
-  delete(creatorId: string, boardId: string) {
-    const boardWithCreator = this.findCreatorBoardRelation(creatorId, boardId);
-
-    if (!boardWithCreator) {
-      throw new ForbiddenException('User dont have permission to update this board');
-    }
+  async delete(creatorId: string, boardId: string) {
+    await this.findCreatorBoardRelation(creatorId, boardId);
 
     return this.prismaService.board.delete({
-      where: { id: boardId }
+      where: { id: boardId },
     });
   }
 
   async inviteUserToBoard(creatorId: string, dto: UpdateBoardDto) {
-    const boardWithCreator = this.findCreatorBoardRelation(creatorId, dto.id);
-
-    if (!boardWithCreator) {
-      throw new ForbiddenException('User dont have permission to remove others from the board');
-    }
+    await this.findCreatorBoardRelation(creatorId, dto.id);
 
     const invitedUser = await this.userService.findByEmail(dto.inviteuser);
-
     if (!invitedUser) {
-      throw new ForbiddenException('Invited user does not exist');
+      throw new NotFoundException('Invited user does not exist');
+    }
+
+    const existingRelation = await this.prismaService.usersWithBoards.findUnique({
+      where: {
+        userId_boardId: {
+          userId: invitedUser.id,
+          boardId: dto.id,
+        },
+      },
+    });
+
+    if (existingRelation) {
+      throw new ForbiddenException('User is already a member of the board');
     }
 
     return this.prismaService.usersWithBoards.create({
       data: {
         userId: invitedUser.id,
         boardId: dto.id,
-        isCreator: false
-      }
+        isCreator: false,
+      },
     });
   }
 
   async removeUserFromBoard(creatorId: string, dto: UpdateBoardDto) {
-    const boardWithCreator = this.findCreatorBoardRelation(creatorId, dto.id);
-
-    if (!boardWithCreator) {
-      throw new ForbiddenException('User dont have permission to remove others from the board');
-    }
+    await this.findCreatorBoardRelation(creatorId, dto.id);
 
     const invitedUser = await this.userService.findByEmail(dto.inviteuser);
-
     if (!invitedUser) {
-      throw new ForbiddenException('Invited user does not exist');
+      throw new NotFoundException('Invited user does not exist');
     }
 
     return this.prismaService.usersWithBoards.delete({
       where: {
-        userId_boardId: { 
+        userId_boardId: {
           userId: invitedUser.id,
           boardId: dto.id,
         },
