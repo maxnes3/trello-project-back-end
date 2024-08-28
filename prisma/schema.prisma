@@ -24,7 +24,7 @@ model User {
 
 // Сущность доски
 model Board {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   name      String
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -36,8 +36,8 @@ model Board {
 
 model UsersWithBoards {
   userId    String   @map("user_id")
-  creator   Boolean  @map("creator")
-  boardId   Int      @map("board_id")
+  isCreator Boolean  @map("is_creator")
+  boardId   String   @map("board_id")
 
   user      User     @relation("UserByBoard", fields: [userId], references: [id], onDelete: Cascade)
   board     Board    @relation("BoardByUser", fields: [boardId], references: [id], onDelete: Cascade)
@@ -48,9 +48,9 @@ model UsersWithBoards {
 
 // Сущность колонны
 model Column {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   name      String
-  boardId   Int      @map("board_id")
+  boardId   String   @map("board_id")
   position  Int
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -62,10 +62,10 @@ model Column {
 
 // Сущность карточки
 model Card {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   title     String
   description String?
-  columnId  Int      @map("column_id")
+  columnId  String   @map("column_id")
   position  Int
   userId    String   @map("user_id")
   createdAt DateTime @default(now()) @map("created_at")
@@ -79,9 +79,9 @@ model Card {
 
 // Сущность комментария
 model Comment {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   text      String
-  cardId    Int      @map("card_id")
+  cardId    String   @map("card_id")
   userId    String   @map("user_id")
   createdAt DateTime @default(now()) @map("created_at")
 
