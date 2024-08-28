@@ -1,5 +1,5 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { IsBoolean, IsInt, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class InsertCardDto {
     @ApiProperty({
@@ -10,7 +10,7 @@ export class InsertCardDto {
     @MinLength(1, { message: 'Title should not be empty' })
     title: string;
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         description: 'Description of the card',
         example: 'This is a detailed description of the card.',
         required: false,
@@ -35,10 +35,18 @@ export class UpdateCardDto extends PartialType(InsertCardDto) {
     @IsString()
     id: string;
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         description: 'Position of the card within the column',
         example: 1,
     })
+    @IsOptional()
     @IsInt()
     position?: number;
+
+    @ApiPropertyOptional({
+        description: '',
+        example: true
+    })
+    @IsBoolean()
+    isCompleted?: boolean;
 }

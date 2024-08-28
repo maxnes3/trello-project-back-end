@@ -22,10 +22,10 @@ export class CardService {
     async insert(dto: InsertCardDto) {
         const maxPosition = await this.prismaService.card.aggregate({
             _max: {
-              position: true,
+                position: true,
             },
             where: {
-              columnId: dto.columnId,
+                columnId: dto.columnId,
             },
         });
 
@@ -68,8 +68,9 @@ export class CardService {
         return this.prismaService.card.update({
             where: { id: dto.id },
             data: {
-              title: dto.title ?? card.title,
-              position: dto.position ?? card.position,
+                title: dto.title ?? card.title,
+                position: dto.position ?? card.position,
+                isCompleted: dto.isCompleted ?? card.isCompleted
             },
         });
     }

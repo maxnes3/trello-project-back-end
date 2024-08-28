@@ -28,10 +28,11 @@ export class UpdateColumnDto {
     @IsString()
     id: string;
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         description: 'The name of the column',
         example: 'To Do',
     })
+    @IsOptional()
     @IsString()
     @MinLength(4, {
         message: 'The name of the column must not be empty',
