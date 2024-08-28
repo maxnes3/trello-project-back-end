@@ -16,7 +16,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Trello-Project')
-    .setDescription('API description')
+    .setDescription('The project used: Nest.js, PostgreSQL, JWT Authorization, REST API, Validation pipe, Guards and Swagger.')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

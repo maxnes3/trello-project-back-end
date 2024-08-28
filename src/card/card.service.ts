@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { InsertCardDto, UpdateCardDto } from './dto/card.dto';
 
@@ -7,6 +7,29 @@ export class CardService {
     constructor(
         private prismaService: PrismaService
     ) {}
+
+    stringToDate(stringDate: string): Date {
+        const [day, month, year] = stringDate.split('-').map(Number);
+
+        if (
+            isNaN(day) || isNaN(month) || isNaN(year) ||
+            day < 1 || month < 1 || month > 12 || year < 1
+        ) {
+            throw new BadRequestException('Invalid date format or value');
+        }
+        
+        const newDate = new Date(year, month - 1, day);
+
+        if (
+            newDate.getFullYear() !== year ||
+            newDate.getMonth() !== month - 1 ||
+            newDate.getDate() !== day
+        ) {
+            throw new BadRequestException('Invalid date value');
+        }
+
+        return newDate;
+    }
 
     findById(cardId: string){
         return this.prismaService.card.findUnique({
@@ -31,11 +54,14 @@ export class CardService {
 
         const newPosition = maxPosition._max.position ? maxPosition._max.position + 1 : 1;
 
+        const deadlineDate = this.stringToDate(dto.deadline);
+
         return this.prismaService.card.create({
             data: {
                 columnId: dto.columnId,
                 title: dto.title.trim(),
                 position: newPosition,
+                deadline: deadlineDate,
             },
         });
     }
@@ -65,12 +91,15 @@ export class CardService {
             });
         }
 
+        const deadlineDate = this.stringToDate(dto.deadline);
+
         return this.prismaService.card.update({
             where: { id: dto.id },
             data: {
                 title: dto.title ?? card.title,
                 position: dto.position ?? card.position,
-                isCompleted: dto.isCompleted ?? card.isCompleted
+                isCompleted: dto.isCompleted ?? card.isCompleted,
+                deadline: deadlineDate ?? card.deadline
             },
         });
     }
