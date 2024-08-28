@@ -8,5 +8,6 @@ import { UserModule } from '../user/user.module';
   imports: [UserModule],
   controllers: [BoardController],
   providers: [BoardService, PrismaService],
+  exports: [BoardService]
 })
 export class BoardModule {}

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { InsertBoardDto, UpdateBoardDto } from './dto/board.dto';
 import { UserService } from '../user/user.service';
@@ -10,12 +10,12 @@ export class BoardService {
     private readonly userService: UserService,
   ) {}
 
-  private async findCreatorBoardRelation(userId: string, boardId: string) {
+  private async findUserBoardRelation(userId: string, boardId: string, creator: boolean = false) {
     const relation = await this.prismaService.usersWithBoards.findFirst({
       where: {
         boardId,
         userId,
-        isCreator: true,
+        isCreator: creator,
       },
     });
 
@@ -30,6 +30,11 @@ export class BoardService {
     const userBoards = await this.prismaService.usersWithBoards.findMany({
       where: { userId },
       include: { board: true },
+      orderBy: {
+        board: {
+          createdAt: 'desc',
+        },
+      },
     });
 
     return userBoards.map(userBoard => userBoard.board);
@@ -53,7 +58,11 @@ export class BoardService {
   }
 
   async update(creatorId: string, dto: UpdateBoardDto) {
-    await this.findCreatorBoardRelation(creatorId, dto.id);
+    await this.findUserBoardRelation(creatorId, dto.id);
+
+    if (!dto.name || dto.name.trim().length === 0) {
+      throw new BadRequestException('Board name must not be empty');
+    }
 
     return this.prismaService.board.update({
       where: { id: dto.id },
@@ -62,7 +71,7 @@ export class BoardService {
   }
 
   async delete(creatorId: string, boardId: string) {
-    await this.findCreatorBoardRelation(creatorId, boardId);
+    await this.findUserBoardRelation(creatorId, boardId, true);
 
     return this.prismaService.board.delete({
       where: { id: boardId },
@@ -70,7 +79,7 @@ export class BoardService {
   }
 
   async inviteUserToBoard(creatorId: string, dto: UpdateBoardDto) {
-    await this.findCreatorBoardRelation(creatorId, dto.id);
+    await this.findUserBoardRelation(creatorId, dto.id, true);
 
     const invitedUser = await this.userService.findByEmail(dto.inviteuser);
     if (!invitedUser) {
@@ -94,13 +103,12 @@ export class BoardService {
       data: {
         userId: invitedUser.id,
         boardId: dto.id,
-        isCreator: false,
       },
     });
   }
 
   async removeUserFromBoard(creatorId: string, dto: UpdateBoardDto) {
-    await this.findCreatorBoardRelation(creatorId, dto.id);
+    await this.findUserBoardRelation(creatorId, dto.id, true);
 
     const invitedUser = await this.userService.findByEmail(dto.inviteuser);
     if (!invitedUser) {

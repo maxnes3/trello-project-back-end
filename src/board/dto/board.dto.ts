@@ -32,7 +32,7 @@ export class UpdateBoardDto {
     @MinLength(4, {
         message: 'The Name of board must consist of at least 4 characters'
     })
-    name: string
+    name?: string
 
     @ApiPropertyOptional({
         example: 'inviteuser@example.com',
@@ -40,5 +40,5 @@ export class UpdateBoardDto {
     })
     @IsOptional()
     @IsEmail()
-    inviteuser: string
+    inviteuser?: string
 }

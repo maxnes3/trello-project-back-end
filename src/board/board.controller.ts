@@ -16,7 +16,7 @@ export class BoardController {
   @HttpCode(200)
   @Get('getbyuser')
   @Auth()
-  @ApiOperation({ summary: 'Get all boards by user' })
+  @ApiOperation({ summary: 'Get all boards by user ID' })
   @ApiResponse({ status: 200, description: 'Successfully retrieved user boards.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async getBoardsByUser(
@@ -30,7 +30,10 @@ export class BoardController {
   @Post('create')
   @Auth()
   @ApiOperation({ summary: 'Create a new board' })
-  @ApiBody({ type: InsertBoardDto })
+  @ApiBody({ 
+    type: InsertBoardDto,
+    description: 'Data for creating a new board'
+  })
   @ApiResponse({ status: 200, description: 'The board has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Invalid data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
@@ -46,7 +49,10 @@ export class BoardController {
   @Put('inviteuser')
   @Auth()
   @ApiOperation({ summary: 'Invite a user to the board' })
-  @ApiBody({ type: UpdateBoardDto })
+  @ApiBody({ 
+    type: UpdateBoardDto,
+    description: 'Data for updating an existing board'
+  })
   @ApiResponse({ status: 200, description: 'User has been successfully invited.' })
   @ApiResponse({ status: 400, description: 'Invalid data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
@@ -62,7 +68,10 @@ export class BoardController {
   @Put('removeuser')
   @Auth()
   @ApiOperation({ summary: 'Remove a user from the board' })
-  @ApiBody({ type: UpdateBoardDto })
+  @ApiBody({ 
+    type: UpdateBoardDto,
+    description: 'Data for updating an existing board' 
+  })
   @ApiResponse({ status: 200, description: 'User has been successfully removed.' })
   @ApiResponse({ status: 400, description: 'Invalid data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
@@ -78,7 +87,10 @@ export class BoardController {
   @Put('update')
   @Auth()
   @ApiOperation({ summary: 'Update a board' })
-  @ApiBody({ type: UpdateBoardDto })
+  @ApiBody({ 
+    type: UpdateBoardDto,
+    description: 'Data for updating an existing board' 
+  })
   @ApiResponse({ status: 200, description: 'The board has been successfully updated.' })
   @ApiResponse({ status: 400, description: 'Invalid data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
@@ -93,8 +105,12 @@ export class BoardController {
   @HttpCode(200)
   @Delete('delete/:id')
   @Auth()
-  @ApiOperation({ summary: 'Delete a board' })
-  @ApiParam({ name: 'id', description: 'The ID of the board to delete' })
+  @ApiOperation({ summary: 'Delete a board by ID' })
+  @ApiParam({ 
+    name: 'id',
+    type: String, 
+    description: 'The ID of the board to delete' 
+  })
   @ApiResponse({ status: 200, description: 'The board has been successfully deleted.' })
   @ApiResponse({ status: 400, description: 'Invalid data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })

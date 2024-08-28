@@ -15,7 +15,6 @@ model User {
   password  String
   createdAt DateTime @default(now()) @map("created_at")
 
-  cards     Card[]   @relation("UserCards")
   comments  Comment[] @relation("UserComments")
   usersWithBoards UsersWithBoards[] @relation("UserByBoard")
 
@@ -36,7 +35,7 @@ model Board {
 
 model UsersWithBoards {
   userId    String   @map("user_id")
-  isCreator Boolean  @map("is_creator")
+  isCreator Boolean  @default(false) @map("is_creator")
   boardId   String   @map("board_id")
 
   user      User     @relation("UserByBoard", fields: [userId], references: [id], onDelete: Cascade)
@@ -67,11 +66,10 @@ model Card {
   description String?
   columnId  String   @map("column_id")
   position  Int
-  userId    String   @map("user_id")
+  isCompleted Boolean @default(false) @map("is_completed")
   createdAt DateTime @default(now()) @map("created_at")
 
   column    Column   @relation("ColumnCards", fields: [columnId], references: [id], onDelete: Cascade)
-  user      User     @relation("UserCards", fields: [userId], references: [id], onDelete: Cascade)
   comments  Comment[] @relation("CardComments")
 
   @@map("cards")
