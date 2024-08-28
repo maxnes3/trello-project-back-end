@@ -26,12 +26,10 @@ export class InsertCardDto {
     @IsString()
     columnId: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: 'Deadline for completing the card in the format DD-MM-YYYY',
-        example: '31-12-2024',
-        required: false,
+        example: '31-12-2024'
     })
-    @IsOptional()
     @Matches(/^\d{2}-\d{2}-\d{4}$/, { 
         message: 'Deadline must be in the format DD-MM-YYYY' 
     })
