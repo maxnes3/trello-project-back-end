@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { verify } from 'argon2';
@@ -8,100 +13,100 @@ import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
-    constructor(
-        private jwt: JwtService,
-        private userSevice: UserService
-    ) {}
+  constructor(
+    private jwt: JwtService,
+    private userSevice: UserService
+  ) {}
 
-    EXPIRE_DAY_REFRESH_TOKEN = 1;
-    REFRESH_TOKEN_NAME = 'refreshToken';
+  EXPIRE_DAY_REFRESH_TOKEN = 1;
+  REFRESH_TOKEN_NAME = 'refreshToken';
 
-    async signUp(dto: SignUpDto) {
-        const alreadyUser = await this.userSevice.findByEmail(dto.email);
+  async signUp(dto: SignUpDto) {
+    const alreadyUser = await this.userSevice.findByEmail(dto.email);
 
-        if (alreadyUser) {
-            throw new BadRequestException('User with this email has already exist');
-        }
-
-        const { password, ...user} = await this.userSevice.insert(dto);
-
-        const tokens = this.issueTokens(user.id);
-
-        return { user, ...tokens };
+    if (alreadyUser) {
+      throw new BadRequestException('User with this email has already exist');
     }
 
-    async signIn(dto: SignInDto) {
-        const { password, ...user} = await this.validateUser(dto);
+    const { password, ...user } = await this.userSevice.insert(dto);
 
-        const tokens = this.issueTokens(user.id);
+    const tokens = this.issueTokens(user.id);
 
-        return { user, ...tokens };
+    return { user, ...tokens };
+  }
+
+  async signIn(dto: SignInDto) {
+    const { password, ...user } = await this.validateUser(dto);
+
+    const tokens = this.issueTokens(user.id);
+
+    return { user, ...tokens };
+  }
+
+  async getFreshTokens(refreshToken: string) {
+    const result = await this.jwt.verifyAsync(refreshToken);
+
+    if (!result) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
-    async getFreshTokens(refreshToken: string) {
-        const result = await this.jwt.verifyAsync(refreshToken);
+    const { password, ...user } = await this.userSevice.findById(result.id);
 
-        if (!result) {
-            throw new UnauthorizedException('Invalid refresh token');
-        }
+    const tokens = this.issueTokens(user.id);
 
-        const { password, ...user } = await this.userSevice.findById(result.id);
+    return { user, ...tokens };
+  }
 
-        const tokens = this.issueTokens(user.id);
+  private issueTokens(userId: string) {
+    const data = { id: userId };
 
-        return { user, ...tokens };
+    const accessToken = this.jwt.sign(data, {
+      expiresIn: '1h'
+    });
+
+    const refreshToken = this.jwt.sign(data, {
+      expiresIn: '7d'
+    });
+
+    return { accessToken, refreshToken };
+  }
+
+  private async validateUser(dto: SignInDto) {
+    const user = await this.userSevice.findByEmail(dto.email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
-    private issueTokens(userId: string) {
-        const data = {id:userId};
+    const isValidPassword = await verify(user.password, dto.password);
 
-        const accessToken = this.jwt.sign(data, {
-            expiresIn: '1h'
-        });
-
-        const refreshToken = this.jwt.sign(data, {
-            expiresIn: '7d'
-        });
-
-        return { accessToken, refreshToken };
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Invalid password');
     }
 
-    private async validateUser(dto: SignInDto) {
-        const user = await this.userSevice.findByEmail(dto.email);
+    return user;
+  }
 
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
+  injectRefreshToken(res: Response, refreshToken: string) {
+    const expiresIn = new Date();
 
-        const isValidPassword = await verify(user.password, dto.password);
+    expiresIn.setDate(expiresIn.getDate() + this.EXPIRE_DAY_REFRESH_TOKEN);
+    res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
+      httpOnly: true,
+      domain: 'localhost',
+      expires: expiresIn,
+      secure: true,
+      sameSite: 'none'
+    });
+  }
 
-        if (!isValidPassword) {
-            throw new UnauthorizedException('Invalid password');
-        }
-
-        return user;
-    }
-
-    injectRefreshToken(res: Response, refreshToken: string) {
-        const expiresIn = new Date();
-
-        expiresIn.setDate(expiresIn.getDate() + this.EXPIRE_DAY_REFRESH_TOKEN);
-        res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
-            httpOnly: true,
-            domain: 'localhost',
-            expires: expiresIn,
-            secure: true,
-            sameSite: 'none',
-        });
-    }
-
-    removeRefreshToken(res: Response){
-        res.cookie(this.REFRESH_TOKEN_NAME, '', {
-            httpOnly: true,
-            domain: 'localhost',
-            expires: new Date(0),
-            secure: true,
-            sameSite: 'none',
-        });
-    }
+  removeRefreshToken(res: Response) {
+    res.cookie(this.REFRESH_TOKEN_NAME, '', {
+      httpOnly: true,
+      domain: 'localhost',
+      expires: new Date(0),
+      secure: true,
+      sameSite: 'none'
+    });
+  }
 }

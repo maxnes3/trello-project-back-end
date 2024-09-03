@@ -8,6 +8,14 @@ import { CardModule } from './card/card.module';
 import { CommentModule } from './comment/comment.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, UserModule, BoardModule, ColumnModule, CardModule, CommentModule],
+  imports: [
+    ConfigModule.forRoot(),
+    AuthModule,
+    UserModule,
+    BoardModule,
+    ColumnModule,
+    CardModule,
+    CommentModule
+  ]
 })
 export class AppModule {}

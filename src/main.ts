@@ -9,14 +9,16 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.use(cookieParser());
   app.enableCors({
-    origin: ['http://localhost:8080'],
+    origin: [process.env.URL_FRONTEND],
     credentials: true,
     exposedHeaders: 'set-cookie'
   });
 
   const config = new DocumentBuilder()
     .setTitle('Trello-Project')
-    .setDescription('The project used: Nest.js, PostgreSQL, JWT Authorization, REST API, Validation pipe, Guards and Swagger. ER Diagram: https://dbdiagram.io/d/TrelloProject_ER_Diagram-66cb79b63f611e76e96d1b2b')
+    .setDescription(
+      'The project used: Nest.js, PostgreSQL, JWT Authorization, REST API, Validation pipe, Guards and Swagger. ER Diagram: https://dbdiagram.io/d/TrelloProject_ER_Diagram-66cb79b63f611e76e96d1b2b'
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -24,6 +26,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  await app.listen(process.env.URL_PORT);
 }
 bootstrap();

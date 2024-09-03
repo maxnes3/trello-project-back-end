@@ -5,6 +5,6 @@ import { PrismaService } from '../prisma.service';
 
 @Module({
   controllers: [ColumnController],
-  providers: [ColumnService, PrismaService],
+  providers: [ColumnService, PrismaService]
 })
 export class ColumnModule {}

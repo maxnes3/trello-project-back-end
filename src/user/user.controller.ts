@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Put,
+  UsePipes,
+  ValidationPipe
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { UpdateUserDto } from './dto/user.dto';
@@ -16,13 +23,13 @@ export class UserController {
   @Auth()
   @ApiOperation({ summary: 'Update user details' })
   @ApiBody({ type: UpdateUserDto })
-  @ApiResponse({ status: 200, description: 'User details have been successfully updated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User details have been successfully updated.'
+  })
   @ApiResponse({ status: 400, description: 'Invalid data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async updateUser(
-    @CurrentUser('id') id: string,
-    @Body() dto: UpdateUserDto
-  ){
+  async updateUser(@CurrentUser('id') id: string, @Body() dto: UpdateUserDto) {
     return this.userService.update(id, dto);
   }
 }

@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { InsertBoardDto, UpdateBoardDto } from './dto/board.dto';
 import { UserService } from '../user/user.service';
@@ -7,20 +12,26 @@ import { UserService } from '../user/user.service';
 export class BoardService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly userService: UserService,
+    private readonly userService: UserService
   ) {}
 
-  private async findUserBoardRelation(userId: string, boardId: string, creator: boolean = false) {
+  private async findUserBoardRelation(
+    userId: string,
+    boardId: string,
+    creator: boolean = false
+  ) {
     const relation = await this.prismaService.usersWithBoards.findFirst({
       where: {
         boardId,
         userId,
-        isCreator: creator,
-      },
+        isCreator: creator
+      }
     });
 
     if (!relation) {
-      throw new ForbiddenException('User does not have permission to manage this board');
+      throw new ForbiddenException(
+        'User does not have permission to manage this board'
+      );
     }
 
     return relation;
@@ -32,12 +43,12 @@ export class BoardService {
       include: { board: true },
       orderBy: {
         board: {
-          createdAt: 'desc',
-        },
-      },
+          createdAt: 'desc'
+        }
+      }
     });
 
-    return userBoards.map(userBoard => userBoard.board);
+    return userBoards.map((userBoard) => userBoard.board);
   }
 
   async insert(userId: string, dto: InsertBoardDto) {
@@ -47,11 +58,11 @@ export class BoardService {
         usersWithBoards: {
           create: {
             userId,
-            isCreator: true,
-          },
-        },
+            isCreator: true
+          }
+        }
       },
-      include: { usersWithBoards: true },
+      include: { usersWithBoards: true }
     });
 
     return board;
@@ -66,7 +77,7 @@ export class BoardService {
 
     return this.prismaService.board.update({
       where: { id: dto.id },
-      data: { name: dto.name },
+      data: { name: dto.name }
     });
   }
 
@@ -74,7 +85,7 @@ export class BoardService {
     await this.findUserBoardRelation(creatorId, boardId, true);
 
     return this.prismaService.board.delete({
-      where: { id: boardId },
+      where: { id: boardId }
     });
   }
 
@@ -86,14 +97,15 @@ export class BoardService {
       throw new NotFoundException('Invited user does not exist');
     }
 
-    const existingRelation = await this.prismaService.usersWithBoards.findUnique({
-      where: {
-        userId_boardId: {
-          userId: invitedUser.id,
-          boardId: dto.id,
-        },
-      },
-    });
+    const existingRelation =
+      await this.prismaService.usersWithBoards.findUnique({
+        where: {
+          userId_boardId: {
+            userId: invitedUser.id,
+            boardId: dto.id
+          }
+        }
+      });
 
     if (existingRelation) {
       throw new ForbiddenException('User is already a member of the board');
@@ -102,8 +114,8 @@ export class BoardService {
     return this.prismaService.usersWithBoards.create({
       data: {
         userId: invitedUser.id,
-        boardId: dto.id,
-      },
+        boardId: dto.id
+      }
     });
   }
 
@@ -119,9 +131,9 @@ export class BoardService {
       where: {
         userId_boardId: {
           userId: invitedUser.id,
-          boardId: dto.id,
-        },
-      },
+          boardId: dto.id
+        }
+      }
     });
   }
 }

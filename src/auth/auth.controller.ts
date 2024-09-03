@@ -1,4 +1,14 @@
-import { Body, Controller, HttpCode, Post, Req, Res, UnauthorizedException, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+  UsePipes,
+  ValidationPipe
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/auth.dto';
 import { SignInDto } from './dto/auth.dto';
@@ -8,9 +18,7 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @UsePipes(new ValidationPipe())
   @HttpCode(200)
@@ -20,10 +28,10 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User successfully signed up.' })
   @ApiResponse({ status: 400, description: 'Invalid signup data.' })
   async signUp(
-    @Body() dto: SignUpDto, 
+    @Body() dto: SignUpDto,
     @Res({ passthrough: true }) res: Response
-  ){
-    const {refreshToken, ...response} = await this.authService.signUp(dto);
+  ) {
+    const { refreshToken, ...response } = await this.authService.signUp(dto);
     this.authService.injectRefreshToken(res, refreshToken);
     return response;
   }
@@ -37,10 +45,10 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Invalid signin data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async signIn(
-    @Body() dto: SignInDto, 
+    @Body() dto: SignInDto,
     @Res({ passthrough: true }) res: Response
-  ){
-    const {refreshToken, ...response} = await this.authService.signIn(dto);
+  ) {
+    const { refreshToken, ...response } = await this.authService.signIn(dto);
     this.authService.injectRefreshToken(res, refreshToken);
     return response;
   }
@@ -52,9 +60,9 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Tokens successfully refreshed.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async getFreshTokens(
-    @Req() req: Request, 
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response
-  ){
+  ) {
     const cookieRefreshToken = req.cookies[this.authService.REFRESH_TOKEN_NAME];
 
     if (!cookieRefreshToken) {
@@ -62,7 +70,8 @@ export class AuthController {
       throw new UnauthorizedException('Refresh token not passed');
     }
 
-    const { refreshToken, ...response } = await this.authService.getFreshTokens(cookieRefreshToken);
+    const { refreshToken, ...response } =
+      await this.authService.getFreshTokens(cookieRefreshToken);
 
     return response;
   }
@@ -72,9 +81,7 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'User logout' })
   @ApiResponse({ status: 200, description: 'User successfully logged out.' })
-  async logout(
-    @Res({ passthrough: true }) res: Response
-  ){
+  async logout(@Res({ passthrough: true }) res: Response) {
     this.authService.removeRefreshToken(res);
     return true;
   }
