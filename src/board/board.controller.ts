@@ -6,9 +6,7 @@ import {
   HttpCode,
   Param,
   Post,
-  Put,
-  UsePipes,
-  ValidationPipe
+  Put
 } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { Auth } from '../auth/decorators/auth.decorator';
@@ -27,7 +25,6 @@ import {
 export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Get('getbyuser')
   @Auth()
@@ -41,7 +38,6 @@ export class BoardController {
     return this.boardService.findBoardsByUser(id);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('create')
   @Auth()
@@ -63,7 +59,6 @@ export class BoardController {
     return this.boardService.insert(id, dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Put('inviteuser')
   @Auth()
@@ -85,7 +80,6 @@ export class BoardController {
     return this.boardService.inviteUserToBoard(id, dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Put('removeuser')
   @Auth()
@@ -107,7 +101,6 @@ export class BoardController {
     return this.boardService.removeUserFromBoard(id, dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Put('update')
   @Auth()
@@ -129,7 +122,6 @@ export class BoardController {
     return this.boardService.update(id, dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Delete('delete/:id')
   @Auth()

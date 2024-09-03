@@ -6,9 +6,7 @@ import {
   HttpCode,
   Param,
   Post,
-  Put,
-  UsePipes,
-  ValidationPipe
+  Put
 } from '@nestjs/common';
 import { CardService } from './card.service';
 import {
@@ -26,7 +24,6 @@ import { Auth } from 'src/auth/decorators/auth.decorator';
 export class CardController {
   constructor(private readonly cardService: CardService) {}
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Get('find/:id')
   @Auth()
@@ -37,7 +34,6 @@ export class CardController {
     return this.cardService.findById(cardId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('create')
   @Auth()
@@ -56,7 +52,6 @@ export class CardController {
     return this.cardService.insert(dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Put('update')
   @Auth()
@@ -75,7 +70,6 @@ export class CardController {
     return this.cardService.update(dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Delete('delete/:id')
   @Auth()

@@ -5,9 +5,7 @@ import {
   Post,
   Req,
   Res,
-  UnauthorizedException,
-  UsePipes,
-  ValidationPipe
+  UnauthorizedException
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/auth.dto';
@@ -20,7 +18,6 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('signup')
   @ApiOperation({ summary: 'User signup' })
@@ -36,7 +33,6 @@ export class AuthController {
     return response;
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('signin')
   @ApiOperation({ summary: 'User signin' })
@@ -53,7 +49,6 @@ export class AuthController {
     return response;
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('signin/access-token')
   @ApiOperation({ summary: 'Get new access and refresh tokens' })
@@ -76,7 +71,6 @@ export class AuthController {
     return response;
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('logout')
   @ApiOperation({ summary: 'User logout' })

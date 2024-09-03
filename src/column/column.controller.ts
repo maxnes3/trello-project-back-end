@@ -6,9 +6,7 @@ import {
   HttpCode,
   Param,
   Post,
-  Put,
-  UsePipes,
-  ValidationPipe
+  Put
 } from '@nestjs/common';
 import { ColumnService } from './column.service';
 import { Auth } from '../auth/decorators/auth.decorator';
@@ -26,7 +24,6 @@ import {
 export class ColumnController {
   constructor(private readonly columnService: ColumnService) {}
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Get('find/:boardid')
   @Auth()
@@ -45,7 +42,6 @@ export class ColumnController {
     return this.columnService.findColumnsByBoard(boardId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('create')
   @Auth()
@@ -61,7 +57,6 @@ export class ColumnController {
     return this.columnService.insert(dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Put('update')
   @Auth()
@@ -81,7 +76,6 @@ export class ColumnController {
     return this.updateColumn(dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Delete('delete/:id')
   @Auth()

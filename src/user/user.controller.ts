@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Put,
-  UsePipes,
-  ValidationPipe
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { UpdateUserDto } from './dto/user.dto';
@@ -17,7 +10,6 @@ import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Put('update')
   @Auth()

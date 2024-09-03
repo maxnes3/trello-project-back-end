@@ -5,9 +5,7 @@ import {
   HttpCode,
   Param,
   Post,
-  Put,
-  UsePipes,
-  ValidationPipe
+  Put
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import {
@@ -26,7 +24,6 @@ import { Auth } from '../auth/decorators/auth.decorator';
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('create')
   @Auth()
@@ -48,7 +45,6 @@ export class CommentController {
     return this.commentService.insert(userId, dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Put('update')
   @Auth()
@@ -70,7 +66,6 @@ export class CommentController {
     return this.commentService.update(userId, dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Delete('delete/:id')
   @Auth()
